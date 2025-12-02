@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 export default function About() {
   return (
     <section className="py-20 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
+      <div id='apropos'></div>
       <div className="container mx-auto px-4">
         <h2 className="text-4xl font-bold text-center text-slate-900 dark:text-slate-50 mb-12">
           À propos
