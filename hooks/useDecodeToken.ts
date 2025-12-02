@@ -8,7 +8,7 @@ interface DecodedToken {
   exp: number;
 }
 
-// ✔️ Déplacer la fonction impure hors du hook
+
 function getNowInSeconds() {
   return Math.floor(Date.now() / 1000);
 }
@@ -22,7 +22,6 @@ export function useDecodeToken() {
     const decoded = decodeToken(token);
     if (!decoded) return { decodedToken: null, isExpired: true };
 
-    // ✔️ React Compiler accepte l’appel ici car la fonction est externe
     const now = getNowInSeconds();
 
     return {
