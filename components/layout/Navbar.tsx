@@ -13,19 +13,21 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User, LayoutDashboard, LogOut, Menu, X } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function Navbar() {
   // Simuler l'état d'authentification - changez à true pour voir le menu authentifié
   const [isAuth, setIsAuth] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useRouter()
 
   const handleLogin = () => {
-    setIsAuth(true);
-    console.log('Login clicked');
+    // setIsAuth(true);
+    navigate.push("/auth/login")
   };
 
   const handleSignup = () => {
-    console.log('Signup clicked');
+    navigate.push("/auth/register")
   };
 
   const handleLogout = () => {

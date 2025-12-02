@@ -1,5 +1,5 @@
 import axios from "axios";
-// import { getToken } from "@/shared/utils/auth";
+import { getToken } from "@/lib/auth";
 import {BASE_URL_API} from "@/lib/api";
 
 const httpClient = axios.create({
@@ -11,10 +11,10 @@ const httpClient = axios.create({
 
 httpClient.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
-    // const token = getToken();
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    const token = getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
   }
   return config;
 });
