@@ -1,6 +1,6 @@
 import axios from "axios";
 import { getToken } from "@/lib/auth";
-import {BASE_URL_API} from "@/lib/api";
+import { BASE_URL_API } from "@/lib/api";
 
 const httpClient = axios.create({
   baseURL: BASE_URL_API,
@@ -9,6 +9,7 @@ const httpClient = axios.create({
   },
 });
 
+// Interceptor pour ajouter automatiquement le token
 httpClient.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const token = getToken();

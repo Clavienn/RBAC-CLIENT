@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -14,26 +14,88 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User, LayoutDashboard, LogOut, Menu, X } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
+import { UserRepoAPI } from '@/infrastructures/repository/UserRepoAPI';
+import { UserType } from '@/domains/models/User';
 
 export default function Navbar() {
-  // Simuler l'état d'authentification - changez à true pour voir le menu authentifié
-  const [isAuth, setIsAuth] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const navigate = useRouter()
+  const [currentUser, setCurrentUser] = useState<UserType | null>(null);
+  const [isLoadingUser, setIsLoadingUser] = useState(false);
+  const router = useRouter();
+  const { user: authUser, isAuthenticated, isLoading, logout } = useAuth();
+
+
+  // Récupérer les informations utilisateur depuis la BD via getById
+  useEffect(() => {
+
+    console.log("AUTHJHHHHH", authUser);
+    
+    const fetchUserData = async () => {
+      if (isAuthenticated && authUser?._id) {
+        setIsLoadingUser(true);
+        try {
+          console.log('📡 Fetching user from DB with ID:', authUser._id);
+          const userData = await UserRepoAPI.getById(authUser._id);
+          console.log('✅ User data fetched:', userData);
+          setCurrentUser(userData);
+        } catch (error) {
+          console.error('❌ Error fetching user data:', error);
+          // Fallback sur les données du token en cas d'erreur
+          setCurrentUser(authUser as any);
+        } finally {
+          setIsLoadingUser(false);
+        }
+      } else {
+        setCurrentUser(null);
+      }
+    };
+
+    fetchUserData();
+  }, [isAuthenticated, authUser?._id]);
 
   const handleLogin = () => {
-    // setIsAuth(true);
-    navigate.push("/auth/login")
+    router.push("/auth/login");
   };
 
   const handleSignup = () => {
-    navigate.push("/auth/register")
+    router.push("/auth/register");
   };
 
   const handleLogout = () => {
-    setIsAuth(false);
-    console.log('Logout clicked');
+    logout();
+    setCurrentUser(null);
+    router.push("/");
   };
+
+  const handleProfile = () => {
+    router.push("/tableau-de-bord/profile");
+  };
+
+  const handleDashboard = () => {
+    router.push("/tableau-de-bord");
+  };
+
+  // Afficher un skeleton pendant le chargement
+  if (isLoading || (isAuthenticated && isLoadingUser)) {
+    return (
+      <nav className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:bg-slate-950/95 dark:supports-[backdrop-filter]:bg-slate-950/60">
+        <div className="container mx-auto px-4">
+          <div className="flex h-16 items-center justify-between">
+            <div className="flex items-center">
+              <Link href="/" className="text-2xl font-bold text-slate-900 dark:text-slate-50">
+                YourCrush
+              </Link>
+            </div>
+            <div className="hidden md:flex items-center gap-4">
+              <div className="h-10 w-24 bg-slate-200 dark:bg-slate-800 rounded animate-pulse"></div>
+              <div className="h-10 w-24 bg-slate-200 dark:bg-slate-800 rounded animate-pulse"></div>
+            </div>
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:bg-slate-950/95 dark:supports-[backdrop-filter]:bg-slate-950/60">
@@ -61,7 +123,7 @@ export default function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-4">
-            {!isAuth ? (
+            {!isAuthenticated ? (
               <>
                 <Button variant="ghost" onClick={handleLogin}>
                   Se connecter
@@ -76,18 +138,27 @@ export default function Navbar() {
                   <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                     <Avatar>
                       <AvatarImage src="https://github.com/shadcn.png" alt="Avatar" />
-                      <AvatarFallback>U</AvatarFallback>
+                      <AvatarFallback>
+                        {currentUser?.name?.charAt(0).toUpperCase() || 'U'}
+                      </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end">
-                  <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
+                  <DropdownMenuLabel>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{currentUser?.name}</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {currentUser?.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleProfile}>
                     <User className="mr-2 h-4 w-4" />
                     <span>Profil</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleDashboard}>
                     <LayoutDashboard className="mr-2 h-4 w-4" />
                     <span>Dashboard</span>
                   </DropdownMenuItem>
@@ -122,19 +193,19 @@ export default function Navbar() {
           <div className="md:hidden py-4 border-t">
             {/* Mobile Navigation Links */}
             <div className="flex flex-col gap-2 mb-4">
-              <a href="#accueil" className="px-4 py-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50">
+              <Link href="/" className="px-4 py-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50">
                 Accueil
-              </a>
-              <a href="#apropos" className="px-4 py-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50">
+              </Link>
+              <Link href="#apropos" className="px-4 py-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50">
                 À propos
-              </a>
-              <a href="#contact" className="px-4 py-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50">
+              </Link>
+              <Link href="#contact" className="px-4 py-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50">
                 Contact
-              </a>
+              </Link>
             </div>
             
             {/* Mobile Auth Buttons */}
-            {!isAuth ? (
+            {!isAuthenticated ? (
               <div className="flex flex-col gap-2">
                 <Button variant="ghost" className="w-full justify-start" onClick={handleLogin}>
                   Se connecter
@@ -145,11 +216,17 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex flex-col gap-2">
-                <Button variant="ghost" className="w-full justify-start">
+                {currentUser && (
+                  <div className="px-4 py-2 mb-2 border-b">
+                    <p className="text-sm font-medium">{currentUser.name}</p>
+                    <p className="text-xs text-muted-foreground">{currentUser.email}</p>
+                  </div>
+                )}
+                <Button variant="ghost" className="w-full justify-start" onClick={handleProfile}>
                   <User className="mr-2 h-4 w-4" />
                   Profil
                 </Button>
-                <Button variant="ghost" className="w-full justify-start">
+                <Button variant="ghost" className="w-full justify-start" onClick={handleDashboard}>
                   <LayoutDashboard className="mr-2 h-4 w-4" />
                   Dashboard
                 </Button>

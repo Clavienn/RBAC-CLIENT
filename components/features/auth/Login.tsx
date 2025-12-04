@@ -1,6 +1,5 @@
 "use client"
 import { useState } from "react";
-
 import { UserRepoAPI } from "@/infrastructures/repository/UserRepoAPI";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +15,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Mail, Lock, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { debugAuth } from "@/lib/auth";
 
 export default function Login() {
   const navigate = useRouter();
@@ -30,10 +30,32 @@ export default function Login() {
     setIsLoading(true);
 
     try {
+      console.log("🚀 Starting login...");
+      
+      // Appel API
       const response = await UserRepoAPI.login({ email, password });
-      console.log("Login success:", response);
-      navigate.push("/tableau-de-bord");
+      
+      console.log("📥 Login API Response:", response);
+      console.log("👤 User data:", response.user);
+      console.log("🔑 Token:", response.token);
+      
+      // Vérifier que les données sont bien sauvegardées
+      setTimeout(() => {
+        const authState = debugAuth();
+        console.log("🔍 Auth state after login:", authState);
+        
+        if (authState.token && authState.user) {
+          console.log("✅ Login successful, redirecting...");
+          navigate.push("/tableau-de-bord");
+        } else {
+          console.error("❌ Auth state is empty after login!");
+          setError("Erreur lors de la sauvegarde des données de connexion");
+        }
+      }, 200);
+      
     } catch (err: any) {
+      console.error("❌ Login error:", err);
+      console.error("❌ Error details:", err?.response?.data);
       setError(
         err?.response?.data?.message || "Échec de la connexion. Veuillez réessayer."
       );
@@ -53,7 +75,7 @@ export default function Login() {
             Entrez vos identifiants pour accéder à votre compte
           </CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit}>
+        <div>
           <CardContent className="space-y-4">
             {error && (
               <Alert variant="destructive">
@@ -75,6 +97,7 @@ export default function Login() {
                   className="pl-10"
                   required
                   disabled={isLoading}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSubmit(e)}
                 />
               </div>
             </div>
@@ -92,12 +115,13 @@ export default function Login() {
                   className="pl-10"
                   required
                   disabled={isLoading}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSubmit(e)}
                 />
               </div>
             </div>
 
             <Button
-              type="submit"
+              onClick={handleSubmit}
               className="w-full"
               disabled={isLoading}
             >
@@ -111,7 +135,7 @@ export default function Login() {
               )}
             </Button>
           </CardContent>
-        </form>
+        </div>
         <CardFooter className="flex flex-col space-y-2">
           <div className="text-sm text-slate-600 text-center">
             Pas encore de compte ?{" "}
