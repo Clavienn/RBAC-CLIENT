@@ -25,7 +25,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({
   className,
-  title = "Espace Client",
+  title = "Espace Administration",
 }) => {
   const router = useRouter();
   const { user: authUser, isAuthenticated, logout } = useAuth();

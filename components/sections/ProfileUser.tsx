@@ -69,9 +69,12 @@ export default function ProfileUser() {
           name: userData.name || '',
           email: userData.email || '',
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
+        if (err instanceof Error) 
+        {
         console.error('❌ Error loading profile:', err);
         setError('Erreur lors du chargement du profil');
+        }
       } finally {
         setIsLoading(false);
       }
@@ -112,13 +115,14 @@ export default function ProfileUser() {
       setIsEditing(false);
       setSuccess('Profil mis à jour avec succès !');
       
-      // Effacer le message de succès après 3 secondes
       setTimeout(() => setSuccess(''), 3000);
-    } catch (err: any) {
-      console.error('❌ Error updating profile:', err);
-      setError(err?.response?.data?.message || 'Erreur lors de la mise à jour du profil');
+    } catch (err: unknown) {
+        if (err instanceof Error) 
+        {
+            console.error("❌ Erreur:", err);
+        }
     } finally {
-      setIsSaving(false);
+        setIsSaving(false);
     }
   };
 

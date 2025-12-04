@@ -12,6 +12,7 @@ import {
   Search,
   User,
   ArrowLeft,
+  Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
@@ -64,13 +65,14 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, [isAuthenticated, authUser?._id]);
 
   const menuItems = [
-    { icon: LayoutDashboard, label: "Tableau de bord", href: "/tableau-de-bord" },
+    { icon: LayoutDashboard, label: "Tableau de bord", href: "/administration" },
     { icon: ArrowLeft, label: "Page d'accueil", href: "/" },
-    { icon: User, label: "Mon profil", href: "/tableau-de-bord/profile" },
+    { icon: User, label: "Mon profil", href: "/administration/profile" },
+    { icon: Users, label: "Gestion utilisateurs", href: "/administration/utilisateurs" },
   ];
 
   const bottomMenuItems = [
-    { icon: Settings, label: "Paramètres", href: "/tableau-de-bord/settings" },
+    { icon: Settings, label: "Paramètres", href: "/administration/settings" },
   ];
 
   return (

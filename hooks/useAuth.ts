@@ -59,12 +59,10 @@ export function useAuth() {
       return;
     }
 
-    // 🔥 CORRECTION: Extraire l'ID du token si _id est vide
     let userId = userData._id;
+    
     if (!userId || userId === "") {
-      console.log('⚠️ No _id in userData, extracting from token...');
       userId = decoded.id;
-      console.log('✅ ID extracted from token:', userId);
     }
 
     // Créer un objet user avec le bon _id
@@ -80,7 +78,7 @@ export function useAuth() {
     isCheckingRef.current = false;
   }, []);
 
-  
+
   useEffect(() => {
     checkAuth();
   }, []); 

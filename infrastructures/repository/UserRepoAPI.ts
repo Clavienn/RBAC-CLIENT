@@ -19,11 +19,7 @@ export const UserRepoAPI: IUserRepo = {
   async login(data): Promise<LoginResponseType> {
     try {
       const res = await httpClient.post(endpointUser.login, data);
-      
-      console.log("🔍 Raw API Response:", res.data);
-      console.log("👤 User object from API:", res.data.user);
-      console.log("🔑 Token:", res.data.token);
-      
+
       if (!res.data.user) {
         console.error("❌ No user in response!");
         throw new Error("Réponse invalide du serveur: pas d'utilisateur");
@@ -33,30 +29,24 @@ export const UserRepoAPI: IUserRepo = {
         console.error("❌ No token in response!");
         throw new Error("Réponse invalide du serveur: pas de token");
       }
-      
-      // 🔥 SOLUTION: Extraire l'ID depuis le token si absent dans user
       let userId = res.data.user._id || res.data.user.id;
       
       if (!userId) {
-        console.log("⚠️ No _id in user object, extracting from token...");
+
         const decoded = decodeToken(res.data.token);
         if (decoded?.id) {
           userId = decoded.id;
-          console.log("✅ ID extracted from token:", userId);
+
         } else {
           console.error("❌ Cannot extract ID from token!");
         }
       }
       
-      // Créer un objet user avec le bon _id
       const userWithId = {
         ...res.data.user,
         _id: userId,
       };
       
-      console.log("💾 Saving user with ID:", userWithId);
-      
-      // Sauvegarder l'utilisateur avec le bon _id
       saveUser(userWithId, res.data.token);
       
       return {
@@ -81,15 +71,12 @@ export const UserRepoAPI: IUserRepo = {
 
   async getById(id: string): Promise<UserType> {
     try {
-      console.log("🔍 Getting user by ID:", id);
       
       if (!id || id === "") {
         throw new Error("ID utilisateur invalide ou vide");
       }
       
       const res = await httpClient.get(endpointUser.byId(id));
-      console.log("✅ User fetched:", res.data);
-      
       return res.data;
     } catch (err) {
       console.error("Erreur getUserById:", err);
