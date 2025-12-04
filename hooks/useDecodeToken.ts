@@ -8,29 +8,8 @@ interface DecodedToken {
   exp: number;
 }
 
-
 function getNowInSeconds() {
   return Math.floor(Date.now() / 1000);
-}
-
-export function useDecodeToken() {
-  const token = getToken();
-
-  const { decodedToken, isExpired } = useMemo(() => {
-    if (!token) return { decodedToken: null, isExpired: true };
-
-    const decoded = decodeToken(token);
-    if (!decoded) return { decodedToken: null, isExpired: true };
-
-    const now = getNowInSeconds();
-
-    return {
-      decodedToken: decoded,
-      isExpired: decoded.exp < now,
-    };
-  }, [token]);
-
-  return { decodedToken, isExpired };
 }
 
 export function decodeToken(token: string): DecodedToken | null {
@@ -43,7 +22,10 @@ export function decodeToken(token: string): DecodedToken | null {
     const jsonPayload = decodeURIComponent(
       atob(base64)
         .split("")
-        .map((char) => "%" + ("00" + char.charCodeAt(0).toString(16)).slice(-2))
+        .map(
+          (char) =>
+            "%" + ("00" + char.charCodeAt(0).toString(16)).slice(-2)
+        )
         .join("")
     );
 
@@ -51,4 +33,21 @@ export function decodeToken(token: string): DecodedToken | null {
   } catch {
     return null;
   }
+}
+
+export function useDecodeToken() {
+  const token = getToken();
+
+  return useMemo(() => {
+    if (!token) return { decodedToken: null, isExpired: true };
+
+    const decoded = decodeToken(token);
+    if (!decoded) return { decodedToken: null, isExpired: true };
+
+    const now = getNowInSeconds();
+    return {
+      decodedToken: decoded,
+      isExpired: decoded.exp < now,
+    };
+  }, [token]);
 }
