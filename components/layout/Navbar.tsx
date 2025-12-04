@@ -26,23 +26,17 @@ export default function Navbar() {
   const { user: authUser, isAuthenticated, isLoading, logout } = useAuth();
 
 
-  // Récupérer les informations utilisateur depuis la BD via getById
-  useEffect(() => {
-
-    console.log("AUTHJHHHHH", authUser);
-    
+  useEffect(() => {    
     const fetchUserData = async () => {
       if (isAuthenticated && authUser?._id) {
         setIsLoadingUser(true);
         try {
-          console.log('📡 Fetching user from DB with ID:', authUser._id);
           const userData = await UserRepoAPI.getById(authUser._id);
-          console.log('✅ User data fetched:', userData);
           setCurrentUser(userData);
+
         } catch (error) {
           console.error('❌ Error fetching user data:', error);
-          // Fallback sur les données du token en cas d'erreur
-          setCurrentUser(authUser as any);
+          setCurrentUser(authUser as unknown as UserType);
         } finally {
           setIsLoadingUser(false);
         }
@@ -76,7 +70,7 @@ export default function Navbar() {
     router.push("/tableau-de-bord");
   };
 
-  // Afficher un skeleton pendant le chargement
+
   if (isLoading || (isAuthenticated && isLoadingUser)) {
     return (
       <nav className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:bg-slate-950/95 dark:supports-[backdrop-filter]:bg-slate-950/60">
@@ -101,14 +95,12 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 dark:bg-slate-950/95 dark:supports-[backdrop-filter]:bg-slate-950/60">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="text-2xl font-bold text-slate-900 dark:text-slate-50">
               YourCrush
             </Link>
           </div>
 
-          {/* Center Navigation Links */}
           <div className="hidden md:flex items-center gap-8">
             <Link href="/" className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50 transition-colors">
               Accueil
@@ -121,7 +113,6 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-4">
             {!isAuthenticated ? (
               <>
@@ -191,7 +182,6 @@ export default function Navbar() {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t">
-            {/* Mobile Navigation Links */}
             <div className="flex flex-col gap-2 mb-4">
               <Link href="/" className="px-4 py-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-50">
                 Accueil

@@ -9,7 +9,6 @@ const httpClient = axios.create({
   },
 });
 
-// Interceptor pour ajouter automatiquement le token
 httpClient.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const token = getToken();

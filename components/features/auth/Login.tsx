@@ -16,6 +16,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, Mail, Lock, AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { debugAuth } from "@/lib/auth";
+import axios from "axios";
 
 export default function Login() {
   const navigate = useRouter();
@@ -53,12 +54,18 @@ export default function Login() {
         }
       }, 200);
       
-    } catch (err: any) {
-      console.error("❌ Login error:", err);
-      console.error("❌ Error details:", err?.response?.data);
-      setError(
-        err?.response?.data?.message || "Échec de la connexion. Veuillez réessayer."
-      );
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        console.error("❌ Login error:", err);
+
+        setError(
+          err.response?.data?.message ||
+            "Échec de la connexion. Veuillez réessayer."
+        );
+      } else {
+        console.error("❌ Unknown error:", err);
+        setError("Erreur inconnue. Veuillez réessayer.");
+      }
     } finally {
       setIsLoading(false);
     }
